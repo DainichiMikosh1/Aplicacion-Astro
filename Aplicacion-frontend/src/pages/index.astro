@@ -1,0 +1,250 @@
+---
+// Página principal del frontend para probar la API CRUD
+---
+
+<html lang="es">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Probador de API CRUD</title>
+		<link rel="stylesheet" href="/styles/styles.css" />
+	</head>
+	<body>
+		<div class="container">
+			<div class="header">
+				<h1>Probador de API CRUD</h1> 
+				<p>Interfaz simple para probar el backend con Hono.js</p>
+				<div>
+					<span class="status-indicator status-online"></span>
+					<span>API Backend en http://localhost:3000</span>
+				</div>
+			</div>
+			
+			<div class="nav-tabs">
+				<button class="nav-tab active" onclick="showTab('usuarios', this)">👥 Usuarios</button>
+				<button class="nav-tab" onclick="showTab('productos', this)">📦 Productos</button>
+				<button class="nav-tab" onclick="showTab('info', this)">ℹ️ Información</button>
+			</div>
+			
+			<div class="tab-content">
+				<div id="usuarios" class="section active">
+					<h2>Gestión de Usuarios</h2>
+					
+					<div class="grid">
+						<div class="card">
+							<h3>🧪 Test JavaScript</h3>
+							<button onclick="testFuncion()">Probar JavaScript</button>
+							<button onclick="console.log('Botón clickeado')">Test Console</button>
+						</div>
+						
+						<div class="card">
+							<h3>📋 Listar Usuarios</h3>
+							<button onclick="obtenerUsuarios()">Obtener Todos los Usuarios</button>
+							<div id="response-usuarios-list" class="response" style="display: none;"></div>
+						</div>
+						
+						<div class="card">
+							<h3>🔍 Buscar Usuario por ID</h3>
+							<div class="form-group">
+								<label for="usuario-id">ID del Usuario:</label>
+								<input type="number" id="usuario-id" placeholder="Ej: 1">
+							</div>
+							<button onclick="obtenerUsuarioPorId()">Buscar Usuario</button>
+							<div id="response-usuario-by-id" class="response" style="display: none;"></div>
+						</div>
+						
+						<div class="card">
+							<h3>➕ Crear Usuario</h3>
+							<div class="form-group">
+								<label for="nuevo-nombre">Nombre:</label>
+								<input type="text" id="nuevo-nombre" placeholder="Ej: Juan Pérez">
+							</div>
+							<div class="form-group">
+								<label for="nuevo-email">Email:</label>
+								<input type="email" id="nuevo-email" placeholder="Ej: juan@email.com">
+							</div>
+							<div class="form-group">
+								<label for="nueva-edad">Edad:</label>
+								<input type="number" id="nueva-edad" placeholder="Ej: 30">
+							</div>
+							<button onclick="crearUsuario()">Crear Usuario</button>
+							<div id="response-crear-usuario" class="response" style="display: none;"></div>
+						</div>
+						
+						<div class="card">
+							<h3>✏️ Actualizar Usuario</h3>
+							<div class="form-group">
+								<label for="actualizar-id">ID del Usuario:</label>
+								<input type="number" id="actualizar-id" placeholder="Ej: 1">
+							</div>
+							<div class="form-group">
+								<label for="actualizar-nombre">Nombre:</label>
+								<input type="text" id="actualizar-nombre" placeholder="Nuevo nombre">
+							</div>
+							<div class="form-group">
+								<label for="actualizar-email">Email:</label>
+								<input type="email" id="actualizar-email" placeholder="Nuevo email">
+							</div>
+							<div class="form-group">
+								<label for="actualizar-edad">Edad:</label>
+								<input type="number" id="actualizar-edad" placeholder="Nueva edad">
+							</div>
+							<button onclick="actualizarUsuario()">Actualizar (PUT)</button>
+							<button onclick="actualizarUsuarioParcial()">Actualizar Parcial (PATCH)</button>
+							<div id="response-actualizar-usuario" class="response" style="display: none;"></div>
+						</div>
+					</div>
+					
+					<div class="card" style="margin-top: 20px;">
+						<h3>🗑️ Eliminar Usuario</h3>
+						<div class="form-group">
+							<label for="eliminar-id">ID del Usuario a Eliminar:</label>
+							<input type="number" id="eliminar-id" placeholder="Ej: 1">
+						</div>
+						<button class="danger" onclick="eliminarUsuario()">Eliminar Usuario</button>
+						<div id="response-eliminar-usuario" class="response" style="display: none;"></div>
+					</div>
+				</div>
+				
+				<!-- Sección Productos -->
+				<div id="productos" class="section">
+					<h2>Gestión de Productos</h2>
+					
+					<div class="filters">
+						<h4>🔍 Filtros para Listar Productos</h4>
+						<div class="grid">
+							<div class="form-group">
+								<label for="filtro-categoria">Categoría:</label>
+								<input type="text" id="filtro-categoria" placeholder="Ej: Electrónicos">
+							</div>
+							<div class="form-group">
+								<label for="filtro-precio-min">Precio Mínimo:</label>
+								<input type="number" id="filtro-precio-min" step="0.01" placeholder="Ej: 100">
+							</div>
+							<div class="form-group">
+								<label for="filtro-precio-max">Precio Máximo:</label>
+								<input type="number" id="filtro-precio-max" step="0.01" placeholder="Ej: 500">
+							</div>
+							<div class="form-group">
+								<button onclick="obtenerProductos()">Obtener Productos</button>
+								<button onclick="limpiarFiltros()">Limpiar Filtros</button>
+							</div>
+						</div>
+					</div>
+					
+					<div class="grid">
+						<div class="card">
+							<h3>🔍 Buscar Producto por ID</h3>
+							<div class="form-group">
+								<label for="producto-id">ID del Producto:</label>
+								<input type="number" id="producto-id" placeholder="Ej: 1">
+							</div>
+							<button onclick="obtenerProductoPorId()">Buscar Producto</button>
+							<div id="response-producto-by-id" class="response" style="display: none;"></div>
+						</div>
+						
+						<div class="card">
+							<h3>🏷️ Productos por Categoría</h3>
+							<div class="form-group">
+								<label for="categoria-buscar">Categoría:</label>
+								<input type="text" id="categoria-buscar" placeholder="Ej: Electrónicos">
+							</div>
+							<button onclick="obtenerProductosPorCategoria()">Buscar por Categoría</button>
+							<div id="response-productos-categoria" class="response" style="display: none;"></div>
+						</div>
+						
+						<div class="card">
+							<h3>➕ Crear Producto</h3>
+							<div class="form-group">
+								<label for="nuevo-producto-nombre">Nombre:</label>
+								<input type="text" id="nuevo-producto-nombre" placeholder="Ej: Laptop HP">
+							</div>
+							<div class="form-group">
+								<label for="nuevo-producto-precio">Precio:</label>
+								<input type="number" id="nuevo-producto-precio" step="0.01" placeholder="Ej: 599.99">
+							</div>
+							<div class="form-group">
+								<label for="nuevo-producto-categoria">Categoría:</label>
+								<input type="text" id="nuevo-producto-categoria" placeholder="Ej: Electrónicos">
+							</div>
+							<div class="form-group">
+								<label for="nuevo-producto-stock">Stock:</label>
+								<input type="number" id="nuevo-producto-stock" placeholder="Ej: 10">
+							</div>
+							<button onclick="crearProducto()">Crear Producto</button>
+							<div id="response-crear-producto" class="response" style="display: none;"></div>
+						</div>
+						
+						<div class="card">
+							<h3>📦 Actualizar Stock</h3>
+							<div class="form-group">
+								<label for="stock-producto-id">ID del Producto:</label>
+								<input type="number" id="stock-producto-id" placeholder="Ej: 1">
+							</div>
+							<div class="form-group">
+								<label for="nuevo-stock">Nuevo Stock:</label>
+								<input type="number" id="nuevo-stock" placeholder="Ej: 25">
+							</div>
+							<button onclick="actualizarStock()">Actualizar Stock</button>
+							<div id="response-actualizar-stock" class="response" style="display: none;"></div>
+						</div>
+					</div>
+					
+					<div class="card" style="margin-top: 20px;">
+						<h3>🗑️ Eliminar Producto</h3>
+						<div class="form-group">
+							<label for="eliminar-producto-id">ID del Producto a Eliminar:</label>
+							<input type="number" id="eliminar-producto-id" placeholder="Ej: 1">
+						</div>
+						<button class="danger" onclick="eliminarProducto()">Eliminar Producto</button>
+						<div id="response-eliminar-producto" class="response" style="display: none;"></div>
+					</div>
+					
+					<div id="response-productos-list" class="response" style="display: none;"></div>
+				</div>
+				
+				<!-- Sección Información -->
+				<div id="info" class="section">
+					<h2>Información de la API</h2>
+					
+					<div class="card">
+						<h3>🔗 Endpoints Disponibles</h3>
+						<p><strong>Base URL:</strong> http://localhost:3000</p>
+						
+						<h4>Usuarios (/usuarios)</h4>
+						<ul>
+							<li>GET / - Obtener todos los usuarios</li>
+							<li>GET /:id - Obtener usuario por ID</li>
+							<li>POST / - Crear nuevo usuario</li>
+							<li>PUT /:id - Actualizar usuario completo</li>
+							<li>PATCH /:id - Actualizar usuario parcialmente</li>
+							<li>DELETE /:id - Eliminar usuario</li>
+						</ul>
+						
+						<h4>Productos (/productos)</h4>
+						<ul>
+							<li>GET / - Obtener todos los productos (con filtros)</li>
+							<li>GET /:id - Obtener producto por ID</li>
+							<li>GET /categoria/:categoria - Obtener productos por categoría</li>
+							<li>POST / - Crear nuevo producto</li>
+							<li>PUT /:id - Actualizar producto completo</li>
+							<li>PATCH /:id - Actualizar producto parcialmente</li>
+							<li>PUT /:id/stock - Actualizar solo el stock</li>
+							<li>DELETE /:id - Eliminar producto</li>
+						</ul>
+					</div>
+					
+					<div class="card">
+						<h3>🧪 Probar Conexión</h3>
+						<button onclick="probarConexion()">Probar Conexión con API</button>
+						<div id="response-conexion" class="response" style="display: none;"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<script src="/scripts/script.js" is:inline></script>
+	</body>
+</html>
