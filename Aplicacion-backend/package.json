@@ -1,0 +1,19 @@
+{
+  "name": "aplicacion-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "servidor.js",
+  "scripts": {
+    "start": "node servidor.js",
+    "dev": "node --watch servidor.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["hono", "crud", "api", "backend", "javascript"],
+  "author": "",
+  "license": "ISC",
+  "description": "API CRUD simple usando Hono.js con rutas en español",
+  "dependencies": {
+    "@hono/node-server": "^1.14.3",
+    "hono": "^4.7.11"
+  }
+}
