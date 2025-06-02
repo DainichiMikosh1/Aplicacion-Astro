@@ -1,38 +1,54 @@
-# API CRUD - Aplicación Backend
+# API CRUD Backend con MongoDB
 
-Una API REST simple construida con Hono.js que implementa operaciones CRUD para usuarios y productos.
+Una API RESTful completa construida con Hono.js y MongoDB para gestionar usuarios y productos.
 
 ## 🚀 Características
 
-- **Framework**: Hono.js - Framework web ultrarrápido para JavaScript
-- **Arquitectura**: RESTful API con rutas modulares
-- **Base de datos**: Simulada en memoria (para propósitos de demostración)
-- **Idioma**: Rutas y funciones en español
-- **Validaciones**: Validación de entrada y manejo de errores
+- **Framework**: Hono.js (rápido y ligero)
+- **Base de datos**: MongoDB con driver nativo
+- **Operaciones CRUD completas** para usuarios y productos
+- **Validación de datos** robusta
+- **Filtrado avanzado** para productos
+- **Manejo de errores** consistente
+- **CORS** habilitado para desarrollo frontend
 
-## 📦 Instalación
+## 📋 Requisitos Previos
 
-1. Navegar al directorio del proyecto:
-```bash
-cd Aplicacion-backend
-```
+- Node.js (versión 18 o superior)
+- MongoDB instalado y ejecutándose en `localhost:27017`
+- npm o yarn
 
-2. Instalar dependencias:
+## 🛠️ Instalación
+
+1. **Clonar o descargar el proyecto**
+
+2. **Instalar dependencias**:
 ```bash
 npm install
 ```
 
-3. Iniciar el servidor:
+3. **Configurar MongoDB** (opcional):
+   - Copia `.env.example` a `.env` si quieres personalizar la configuración
+   - Por defecto usa `mongodb://localhost:27017` y base de datos `aplicacion_crud`
+
+4. **Poblar la base de datos con datos iniciales**:
 ```bash
-npm start
+npm run poblar-db
 ```
 
-O para desarrollo con auto-reload:
+## 🏃‍♂️ Ejecución
+
+### Modo desarrollo (con auto-reload):
 ```bash
 npm run dev
 ```
 
-El servidor se ejecutará en `http://localhost:3000`
+### Modo producción:
+```bash
+npm start
+```
+
+El servidor se iniciará en `http://localhost:3000`
 
 ## 📚 Endpoints de la API
 

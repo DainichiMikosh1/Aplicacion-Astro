@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { serve } from '@hono/node-server'
 import { rutasUsuarios } from './rutas/usuarios.js'
 import { rutasProductos } from './rutas/productos.js'
+import { conectarBaseDatos, cerrarConexion } from './config/database.js'
 
 const aplicacion = new Hono()
 
@@ -48,9 +49,40 @@ aplicacion.onError((err, c) => {
 
 const puerto = process.env.PORT || 3000
 
-console.log(`🚀 Servidor iniciando en el puerto ${puerto}`)
+// Función para inicializar el servidor
+async function iniciarServidor() {
+  try {
+    // Conectar a MongoDB primero
+    await conectarBaseDatos()
+    console.log(`Base de datos conectada exitosamente`)
+    
+    // Iniciar el servidor HTTP
+    console.log(`Servidor iniciando en el puerto ${puerto}`)
+    
+    serve({
+      fetch: aplicacion.fetch,
+      port: puerto
+    })
+    
+    console.log(`Servidor corriendo en http://localhost:${puerto}`)
+  } catch (error) {
+    console.error('Error iniciando el servidor:', error)
+    process.exit(1)
+  }
+}
 
-serve({
-  fetch: aplicacion.fetch,
-  port: puerto
+// Manejar cierre del proceso
+process.on('SIGINT', async () => {
+  console.log('\n Cerrando servidor...')
+  await cerrarConexion()
+  process.exit(0)
 })
+
+process.on('SIGTERM', async () => {
+  console.log('\n Cerrando servidor...')
+  await cerrarConexion()
+  process.exit(0)
+})
+
+// Inicializar el servidor
+iniciarServidor()

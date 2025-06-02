@@ -1,245 +1,207 @@
 import { Hono } from 'hono'
+import {
+  obtenerTodosLosProductos,
+  obtenerProductoPorId,
+  obtenerProductosPorCategoria,
+  crearProducto,
+  actualizarProducto,
+  eliminarProducto,
+  actualizarStockProducto
+} from '../modelos/Producto.js'
 
 export const rutasProductos = new Hono()
 
-// Base de datos simulada en memoria
-let productos = [
-  { id: 1, nombre: 'Laptop Dell', precio: 800.99, categoria: 'Electrónicos', stock: 15 },
-  { id: 2, nombre: 'Smartphone Samsung', precio: 450.00, categoria: 'Electrónicos', stock: 25 },
-  { id: 3, nombre: 'Mesa de Oficina', precio: 120.50, categoria: 'Muebles', stock: 8 },
-  { id: 4, nombre: 'Libro de JavaScript', precio: 35.99, categoria: 'Libros', stock: 50 }
-]
-
-let siguienteId = 5
-
-// GET - Obtener todos los productos
-rutasProductos.get('/', (c) => {
-  const categoria = c.req.query('categoria')
-  const precioMin = c.req.query('precio_min')
-  const precioMax = c.req.query('precio_max')
-  
-  let productosFiltrados = [...productos]
-  
-  // Filtrar por categoría
-  if (categoria) {
-    productosFiltrados = productosFiltrados.filter(p => 
-      p.categoria.toLowerCase().includes(categoria.toLowerCase())
-    )
+// GET - Obtener todos los productos (con filtros opcionales)
+rutasProductos.get('/', async (c) => {
+  try {
+    const filtros = {}
+    
+    // Obtener parámetros de consulta
+    const categoria = c.req.query('categoria')
+    const precioMin = c.req.query('precio_min')
+    const precioMax = c.req.query('precio_max')
+    
+    if (categoria) filtros.categoria = categoria
+    if (precioMin) filtros.precio_min = precioMin
+    if (precioMax) filtros.precio_max = precioMax
+    
+    const productos = await obtenerTodosLosProductos(filtros)
+    
+    return c.json({
+      mensaje: 'Lista de productos obtenida exitosamente',
+      datos: productos,
+      total: productos.length,
+      filtros_aplicados: {
+        categoria: categoria || 'ninguno',
+        precio_min: precioMin || 'ninguno',
+        precio_max: precioMax || 'ninguno'
+      }
+    })
+  } catch (error) {
+    console.error('Error obteniendo productos:', error)
+    return c.json({ error: 'Error interno del servidor' }, 500)
   }
-  
-  // Filtrar por precio mínimo
-  if (precioMin) {
-    productosFiltrados = productosFiltrados.filter(p => p.precio >= parseFloat(precioMin))
-  }
-  
-  // Filtrar por precio máximo
-  if (precioMax) {
-    productosFiltrados = productosFiltrados.filter(p => p.precio <= parseFloat(precioMax))
-  }
-  
-  return c.json({
-    mensaje: 'Lista de productos obtenida exitosamente',
-    datos: productosFiltrados,
-    total: productosFiltrados.length,
-    filtros_aplicados: {
-      categoria: categoria || 'ninguno',
-      precio_min: precioMin || 'ninguno',
-      precio_max: precioMax || 'ninguno'
-    }
-  })
 })
 
 // GET - Obtener producto por ID
-rutasProductos.get('/:id', (c) => {
-  const id = parseInt(c.req.param('id'))
-  const producto = productos.find(p => p.id === id)
-  
-  if (!producto) {
-    return c.json({ error: 'Producto no encontrado' }, 404)
+rutasProductos.get('/:id', async (c) => {
+  try {
+    const id = c.req.param('id')
+    const producto = await obtenerProductoPorId(id)
+    
+    if (!producto) {
+      return c.json({ error: 'Producto no encontrado' }, 404)
+    }
+    
+    return c.json({
+      mensaje: 'Producto encontrado',
+      datos: producto
+    })
+  } catch (error) {
+    console.error('Error obteniendo producto por ID:', error)
+    return c.json({ error: 'Error interno del servidor' }, 500)
   }
-  
-  return c.json({
-    mensaje: 'Producto encontrado',
-    datos: producto
-  })
 })
 
 // GET - Obtener productos por categoría
-rutasProductos.get('/categoria/:categoria', (c) => {
-  const categoria = c.req.param('categoria')
-  const productosPorCategoria = productos.filter(p => 
-    p.categoria.toLowerCase() === categoria.toLowerCase()
-  )
-  
-  return c.json({
-    mensaje: `Productos de la categoría "${categoria}"`,
-    datos: productosPorCategoria,
-    total: productosPorCategoria.length
-  })
+rutasProductos.get('/categoria/:categoria', async (c) => {
+  try {
+    const categoria = c.req.param('categoria')
+    const productos = await obtenerProductosPorCategoria(categoria)
+    
+    return c.json({
+      mensaje: `Productos de la categoría "${categoria}"`,
+      datos: productos,
+      total: productos.length
+    })
+  } catch (error) {
+    console.error('Error obteniendo productos por categoría:', error)
+    return c.json({ error: 'Error interno del servidor' }, 500)
+  }
 })
 
 // POST - Crear nuevo producto
 rutasProductos.post('/', async (c) => {
   try {
-    const { nombre, precio, categoria, stock } = await c.req.json()
+    const datosProducto = await c.req.json()
     
-    // Validaciones básicas
-    if (!nombre || precio === undefined || !categoria || stock === undefined) {
-      return c.json({ 
-        error: 'Faltan campos requeridos', 
-        campos_requeridos: ['nombre', 'precio', 'categoria', 'stock'] 
-      }, 400)
-    }
-    
-    // Validar tipos de datos
-    if (isNaN(precio) || isNaN(stock)) {
-      return c.json({ error: 'Precio y stock deben ser números válidos' }, 400)
-    }
-    
-    if (precio < 0 || stock < 0) {
-      return c.json({ error: 'Precio y stock no pueden ser negativos' }, 400)
-    }
-    
-    const nuevoProducto = {
-      id: siguienteId++,
-      nombre,
-      precio: parseFloat(precio),
-      categoria,
-      stock: parseInt(stock)
-    }
-    
-    productos.push(nuevoProducto)
+    const nuevoProducto = await crearProducto(datosProducto)
     
     return c.json({
       mensaje: 'Producto creado exitosamente',
       datos: nuevoProducto
     }, 201)
   } catch (error) {
-    return c.json({ error: 'Datos inválidos en el cuerpo de la petición' }, 400)
+    console.error('Error creando producto:', error)
+    
+    if (error.message.includes('Errores de validación')) {
+      return c.json({ error: error.message }, 400)
+    }
+    
+    return c.json({ error: 'Error interno del servidor' }, 500)
   }
 })
 
 // PUT - Actualizar producto completo
 rutasProductos.put('/:id', async (c) => {
   try {
-    const id = parseInt(c.req.param('id'))
-    const { nombre, precio, categoria, stock } = await c.req.json()
+    const id = c.req.param('id')
+    const datosActualizacion = await c.req.json()
     
-    const indiceProducto = productos.findIndex(p => p.id === id)
-    if (indiceProducto === -1) {
+    const productoActualizado = await actualizarProducto(id, datosActualizacion)
+    
+    if (!productoActualizado) {
       return c.json({ error: 'Producto no encontrado' }, 404)
-    }
-    
-    // Validaciones
-    if (!nombre || precio === undefined || !categoria || stock === undefined) {
-      return c.json({ 
-        error: 'Faltan campos requeridos', 
-        campos_requeridos: ['nombre', 'precio', 'categoria', 'stock'] 
-      }, 400)
-    }
-    
-    if (isNaN(precio) || isNaN(stock)) {
-      return c.json({ error: 'Precio y stock deben ser números válidos' }, 400)
-    }
-    
-    if (precio < 0 || stock < 0) {
-      return c.json({ error: 'Precio y stock no pueden ser negativos' }, 400)
-    }
-    
-    productos[indiceProducto] = {
-      id,
-      nombre,
-      precio: parseFloat(precio),
-      categoria,
-      stock: parseInt(stock)
     }
     
     return c.json({
       mensaje: 'Producto actualizado exitosamente',
-      datos: productos[indiceProducto]
+      datos: productoActualizado
     })
   } catch (error) {
-    return c.json({ error: 'Datos inválidos en el cuerpo de la petición' }, 400)
+    console.error('Error actualizando producto:', error)
+    
+    if (error.message.includes('Errores de validación') ||
+        error.message.includes('ID de producto inválido')) {
+      return c.json({ error: error.message }, 400)
+    }
+    
+    return c.json({ error: 'Error interno del servidor' }, 500)
   }
 })
 
 // PATCH - Actualizar producto parcialmente
 rutasProductos.patch('/:id', async (c) => {
   try {
-    const id = parseInt(c.req.param('id'))
-    const actualizaciones = await c.req.json()
+    const id = c.req.param('id')
+    const datosActualizacion = await c.req.json()
     
-    const indiceProducto = productos.findIndex(p => p.id === id)
-    if (indiceProducto === -1) {
+    const productoActualizado = await actualizarProducto(id, datosActualizacion)
+    
+    if (!productoActualizado) {
       return c.json({ error: 'Producto no encontrado' }, 404)
-    }
-    
-    // Validar tipos si se proporcionan
-    if (actualizaciones.precio !== undefined && (isNaN(actualizaciones.precio) || actualizaciones.precio < 0)) {
-      return c.json({ error: 'Precio debe ser un número válido no negativo' }, 400)
-    }
-    
-    if (actualizaciones.stock !== undefined && (isNaN(actualizaciones.stock) || actualizaciones.stock < 0)) {
-      return c.json({ error: 'Stock debe ser un número válido no negativo' }, 400)
-    }
-    
-    // Actualizar solo los campos proporcionados
-    productos[indiceProducto] = {
-      ...productos[indiceProducto],
-      ...actualizaciones,
-      id, // Mantener el ID original
-      precio: actualizaciones.precio !== undefined ? parseFloat(actualizaciones.precio) : productos[indiceProducto].precio,
-      stock: actualizaciones.stock !== undefined ? parseInt(actualizaciones.stock) : productos[indiceProducto].stock
     }
     
     return c.json({
       mensaje: 'Producto actualizado parcialmente',
-      datos: productos[indiceProducto]
+      datos: productoActualizado
     })
   } catch (error) {
-    return c.json({ error: 'Datos inválidos en el cuerpo de la petición' }, 400)
+    console.error('Error actualizando producto parcialmente:', error)
+    
+    if (error.message.includes('Errores de validación') ||
+        error.message.includes('ID de producto inválido')) {
+      return c.json({ error: error.message }, 400)
+    }
+    
+    return c.json({ error: 'Error interno del servidor' }, 500)
   }
 })
 
 // DELETE - Eliminar producto
-rutasProductos.delete('/:id', (c) => {
-  const id = parseInt(c.req.param('id'))
-  const indiceProducto = productos.findIndex(p => p.id === id)
-  
-  if (indiceProducto === -1) {
-    return c.json({ error: 'Producto no encontrado' }, 404)
+rutasProductos.delete('/:id', async (c) => {
+  try {
+    const id = c.req.param('id')
+    const productoEliminado = await eliminarProducto(id)
+    
+    if (!productoEliminado) {
+      return c.json({ error: 'Producto no encontrado' }, 404)
+    }
+    
+    return c.json({
+      mensaje: 'Producto eliminado exitosamente',
+      datos: productoEliminado
+    })
+  } catch (error) {
+    console.error('Error eliminando producto:', error)
+    return c.json({ error: 'Error interno del servidor' }, 500)
   }
-  
-  const productoEliminado = productos.splice(indiceProducto, 1)[0]
-  
-  return c.json({
-    mensaje: 'Producto eliminado exitosamente',
-    datos: productoEliminado
-  })
 })
 
 // PUT - Actualizar stock del producto
 rutasProductos.put('/:id/stock', async (c) => {
   try {
-    const id = parseInt(c.req.param('id'))
+    const id = c.req.param('id')
     const { stock } = await c.req.json()
     
-    const indiceProducto = productos.findIndex(p => p.id === id)
-    if (indiceProducto === -1) {
+    const productoActualizado = await actualizarStockProducto(id, stock)
+    
+    if (!productoActualizado) {
       return c.json({ error: 'Producto no encontrado' }, 404)
     }
     
-    if (stock === undefined || isNaN(stock) || stock < 0) {
-      return c.json({ error: 'Stock debe ser un número válido no negativo' }, 400)
-    }
-    
-    productos[indiceProducto].stock = parseInt(stock)
-    
     return c.json({
       mensaje: 'Stock actualizado exitosamente',
-      datos: productos[indiceProducto]
+      datos: productoActualizado
     })
   } catch (error) {
-    return c.json({ error: 'Datos inválidos en el cuerpo de la petición' }, 400)
+    console.error('Error actualizando stock:', error)
+    
+    if (error.message.includes('ID de producto inválido') ||
+        error.message.includes('Stock debe ser')) {
+      return c.json({ error: error.message }, 400)
+    }
+    
+    return c.json({ error: 'Error interno del servidor' }, 500)
   }
 })

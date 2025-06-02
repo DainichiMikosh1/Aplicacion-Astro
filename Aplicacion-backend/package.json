@@ -6,14 +6,22 @@
   "scripts": {
     "start": "node servidor.js",
     "dev": "node --watch servidor.js",
+    "poblar-db": "node scripts/poblar-db.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["hono", "crud", "api", "backend", "javascript"],
+  "keywords": [
+    "hono",
+    "crud",
+    "api",
+    "backend",
+    "javascript"
+  ],
   "author": "",
   "license": "ISC",
   "description": "API CRUD simple usando Hono.js con rutas en español",
   "dependencies": {
     "@hono/node-server": "^1.14.3",
-    "hono": "^4.7.11"
+    "hono": "^4.7.11",
+    "mongodb": "^6.16.0"
   }
 }
