@@ -3,13 +3,11 @@ import { obtenerBaseDatos } from '../config/database.js'
 
 const COLECCION_PRODUCTOS = 'productos'
 
-// Función para obtener la colección de productos
 function obtenerColeccionProductos() {
   const bd = obtenerBaseDatos()
   return bd.collection(COLECCION_PRODUCTOS)
 }
 
-// Función para validar datos de producto
 function validarProducto(producto, esActualizacion = false) {
   const errores = []
   
@@ -50,7 +48,6 @@ function validarProducto(producto, esActualizacion = false) {
   return errores
 }
 
-// Función para construir filtros de búsqueda
 function construirFiltros(filtros = {}) {
   const filtroMongo = {}
   
@@ -71,7 +68,6 @@ function construirFiltros(filtros = {}) {
   return filtroMongo
 }
 
-// Obtener todos los productos (con filtros opcionales)
 export async function obtenerTodosLosProductos(filtros = {}) {
   try {
     const coleccion = obtenerColeccionProductos()
@@ -84,7 +80,6 @@ export async function obtenerTodosLosProductos(filtros = {}) {
   }
 }
 
-// Obtener producto por ID
 export async function obtenerProductoPorId(id) {
   try {
     if (!ObjectId.isValid(id)) {
@@ -100,7 +95,6 @@ export async function obtenerProductoPorId(id) {
   }
 }
 
-// Obtener productos por categoría
 export async function obtenerProductosPorCategoria(categoria) {
   try {
     const coleccion = obtenerColeccionProductos()
@@ -114,7 +108,6 @@ export async function obtenerProductosPorCategoria(categoria) {
   }
 }
 
-// Crear nuevo producto
 export async function crearProducto(datosProducto) {
   try {
     // Validar datos
@@ -141,7 +134,6 @@ export async function crearProducto(datosProducto) {
   }
 }
 
-// Actualizar producto
 export async function actualizarProducto(id, datosActualizacion) {
   try {
     if (!ObjectId.isValid(id)) {
@@ -192,7 +184,6 @@ export async function actualizarProducto(id, datosActualizacion) {
   }
 }
 
-// Eliminar producto
 export async function eliminarProducto(id) {
   try {
     if (!ObjectId.isValid(id)) {
@@ -214,7 +205,6 @@ export async function eliminarProducto(id) {
   }
 }
 
-// Actualizar solo el stock de un producto
 export async function actualizarStockProducto(id, nuevoStock) {
   try {
     if (!ObjectId.isValid(id)) {

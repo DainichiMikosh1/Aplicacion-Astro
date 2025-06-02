@@ -3,13 +3,11 @@ import { obtenerBaseDatos } from '../config/database.js'
 
 const COLECCION_USUARIOS = 'usuarios'
 
-// Función para obtener la colección de usuarios
 function obtenerColeccionUsuarios() {
   const bd = obtenerBaseDatos()
   return bd.collection(COLECCION_USUARIOS)
 }
 
-// Función para validar datos de usuario
 function validarUsuario(usuario, esActualizacion = false) {
   const errores = []
   
@@ -44,7 +42,6 @@ function validarUsuario(usuario, esActualizacion = false) {
   return errores
 }
 
-// Obtener todos los usuarios
 export async function obtenerTodosLosUsuarios() {
   try {
     const coleccion = obtenerColeccionUsuarios()
@@ -56,7 +53,6 @@ export async function obtenerTodosLosUsuarios() {
   }
 }
 
-// Obtener usuario por ID
 export async function obtenerUsuarioPorId(id) {
   try {
     if (!ObjectId.isValid(id)) {
@@ -72,7 +68,6 @@ export async function obtenerUsuarioPorId(id) {
   }
 }
 
-// Obtener usuario por email
 export async function obtenerUsuarioPorEmail(email) {
   try {
     const coleccion = obtenerColeccionUsuarios()
@@ -84,7 +79,6 @@ export async function obtenerUsuarioPorEmail(email) {
   }
 }
 
-// Crear nuevo usuario
 export async function crearUsuario(datosUsuario) {
   try {
     // Validar datos
@@ -116,7 +110,6 @@ export async function crearUsuario(datosUsuario) {
   }
 }
 
-// Actualizar usuario
 export async function actualizarUsuario(id, datosActualizacion) {
   try {
     if (!ObjectId.isValid(id)) {
@@ -172,7 +165,6 @@ export async function actualizarUsuario(id, datosActualizacion) {
   }
 }
 
-// Eliminar usuario
 export async function eliminarUsuario(id) {
   try {
     if (!ObjectId.isValid(id)) {
